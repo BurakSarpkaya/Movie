@@ -13,7 +13,6 @@ namespace Entities.MovieApiModel
         public int id { get; set; }
         public bool adult { get; set; }
         public string backdrop_path { get; set; }
-
         public string original_language { get; set; }
         public string original_title { get; set; }
         public string title { get; set; }
