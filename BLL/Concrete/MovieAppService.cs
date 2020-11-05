@@ -66,12 +66,13 @@ namespace BLL.Concrete
         {
             var tasks = new List<MovieResult>();
 
-            for (int i = 1; i < 50; i++)
+            for (int i = 1; i < 5; i++)
             {
                 tasks.AddRange(GetPages(i));
             }
 
             PagedList<MovieResult> model = new PagedList<MovieResult>(tasks, page, pageSize);
+
             return new SuccessDataResult<PagedList<MovieResult>>(model);
         }
 
