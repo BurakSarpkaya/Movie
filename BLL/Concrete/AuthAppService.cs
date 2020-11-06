@@ -49,6 +49,10 @@ namespace BLL.Concrete
 
         public IDataResult<Users> Register(UserForRegisterDto userForRegisterDto)
         {
+            var emailCheck = UserExist(userForRegisterDto.Email);
+            if (!emailCheck.Success)
+                return new ErrorDataResult<Users>(emailCheck.Message);
+
             byte[] passwordHash, passwordSalt;
 
             HashingHelper.CreatePasswordHash(userForRegisterDto.PassWord, out passwordHash, out passwordSalt);
@@ -64,6 +68,16 @@ namespace BLL.Concrete
             _userAppService.Add(userForRegisterDto);
 
             return new SuccessDataResult<Users>(newUser, Messages.UserRegistered);
+        }
+
+        public IResult UserExist(string email)
+        {
+            var checkUser = _userAppService.GetByMail(email);
+
+            if (checkUser != null)
+                return new ErrorResult(Messages.EmailAlreadyExist);
+
+            return new SuccessResult();
         }
     }
 }

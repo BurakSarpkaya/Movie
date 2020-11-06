@@ -42,6 +42,10 @@ namespace Movie.Controllers
         {
 
             var registerResult = _authAppService.Register(userForRegisterDto);
+            if (registerResult.Success != true)
+            {
+                return BadRequest(registerResult.Message);
+            }
             var result = _authAppService.CreateAccessToken(registerResult.Data);
 
             if (result.Success != true)

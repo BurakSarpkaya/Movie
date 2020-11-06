@@ -9,10 +9,8 @@ using PagedList;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 
@@ -46,48 +44,73 @@ namespace BLL.Concrete
         //Kişisel hesaptaki film bilgilerini getirme
         public IDataResult<AccountMovie> GetMovieById(int movieId)
         {
-            HttpWebRequest apiRequest = WebRequest.CreateHttp(string.Format("https://api.themoviedb.org/3/movie/{0}/account_states?api_key={1}&session_id={2}", movieId, apiKey, sessionId)) as HttpWebRequest;
-
-            string apiResponse = "";
-
-            using (HttpWebResponse response = apiRequest.GetResponse() as HttpWebResponse)
+            try
             {
-                StreamReader reader = new StreamReader(response.GetResponseStream());
-                apiResponse = reader.ReadToEnd();
+                HttpWebRequest apiRequest = WebRequest.CreateHttp(string.Format("https://api.themoviedb.org/3/movie/{0}/account_states?api_key={1}&session_id={2}", movieId, apiKey, sessionId)) as HttpWebRequest;
+
+                string apiResponse = "";
+
+                using (HttpWebResponse response = apiRequest.GetResponse() as HttpWebResponse)
+                {
+                    StreamReader reader = new StreamReader(response.GetResponseStream());
+                    apiResponse = reader.ReadToEnd();
+                }
+
+                AccountMovie rootObject = JsonConvert.DeserializeObject<AccountMovie>(apiResponse);
+
+                return new SuccessDataResult<AccountMovie>(rootObject);
             }
+            catch (Exception ex)
+            {
 
-            AccountMovie rootObject = JsonConvert.DeserializeObject<AccountMovie>(apiResponse);
-
-            return new SuccessDataResult<AccountMovie>(rootObject);
+                return new ErrorDataResult<AccountMovie>(ex.Message);
+            }
+            
         }
 
         //tüm filmleri sayfa sayfa getirme
         public IDataResult<PagedList<MovieResult>> GetMovies(int page, int pageSize)
         {
-            var tasks = new List<MovieResult>();
-
-            for (int i = 1; i < 5; i++)
+            try
             {
-                tasks.AddRange(GetPages(i));
+                var tasks = new List<MovieResult>();
+
+                for (int i = 1; i < 5; i++)
+                {
+                    tasks.AddRange(GetPages(i));
+                }
+
+                PagedList<MovieResult> model = new PagedList<MovieResult>(tasks, page, pageSize);
+
+                return new SuccessDataResult<PagedList<MovieResult>>(model);
             }
+            catch (Exception ex)
+            {
 
-            PagedList<MovieResult> model = new PagedList<MovieResult>(tasks, page, pageSize);
-
-            return new SuccessDataResult<PagedList<MovieResult>>(model);
+                return new ErrorDataResult<PagedList<MovieResult>>(ex.Message);
+            }
         }
 
         //filmleri periyodik olarak çekme
         public IDataResult<List<MovieResult>> GetMoviesThread()
         {
-            var tasks = new List<MovieResult>();
-
-            for (int i = 1; i < 50; i++)
+            try
             {
-                tasks.AddRange(GetPages(i));
-                Thread.Sleep(5000);
-            }
+                var tasks = new List<MovieResult>();
 
-            return new SuccessDataResult<List<MovieResult>>(tasks);
+                for (int i = 1; i < 50; i++)
+                {
+                    tasks.AddRange(GetPages(i));
+                    Thread.Sleep(5000);
+                }
+
+                return new SuccessDataResult<List<MovieResult>>(tasks);
+            }
+            catch (Exception ex)
+            {
+
+                return new ErrorDataResult<List<MovieResult>>(ex.Message);
+            }
         }
 
         //yardımcı fonksiyon
@@ -112,42 +135,58 @@ namespace BLL.Concrete
         //belirnen filmi mail olarak yollama
         public IResult MailSend(string email, int movieId)
         {
-            var movie = GetMovieFromApiById(movieId);
+            try
+            {
+                var movie = GetMovieFromApiById(movieId);
 
-            var genresData = JsonConvert.SerializeObject(movie.Data.genres, Formatting.None);
-            var productionCompaniesData= JsonConvert.SerializeObject(movie.Data.production_companies, Formatting.None);
-            var productionCountriesData = JsonConvert.SerializeObject(movie.Data.production_countries, Formatting.None);
+                var genresData = JsonConvert.SerializeObject(movie.Data.genres, Formatting.None);
+                var productionCompaniesData = JsonConvert.SerializeObject(movie.Data.production_companies, Formatting.None);
+                var productionCountriesData = JsonConvert.SerializeObject(movie.Data.production_countries, Formatting.None);
 
 
-            List<string> mailTo = new List<string>();
-            List<string> mailCC = new List<string>();
-            List<string> mailBCC = new List<string>();
+                List<string> mailTo = new List<string>();
+                List<string> mailCC = new List<string>();
+                List<string> mailBCC = new List<string>();
 
-            
-            mailTo.Add(email);
-            string subject = "Movie Advice";
-            string body = "<b>Adult:</b> " + movie.Data.adult + "<br></br>" + "<b>Backdrop Path</b>: " + movie.Data.backdrop_path + "<br></br>" + "<b>Budget:</b> " + movie.Data.budget + "<br></br>" + "<b>Genres:</b> " + genresData + "<br></br>" + "<b>Id:</b> " + movie.Data.id + "<br></br>" + "<b>Imdb Id:</b> " + movie.Data.imdb_id + "<br></br>" + "<b>Original Language:</b> " + movie.Data.original_language + "<br></br>" + "<b>Original Title:</b> " + movie.Data.original_title + "<br></br>" + "<b>Overview:</b> " + movie.Data.overview + "<br></br>" + "<b>Popularity:</b> " + movie.Data.popularity + "<br></br>" + "<b>Production Companies:</b> " + productionCompaniesData + "<br></br>" + "<b>Production Countries:</b> " + productionCountriesData + "<br></br>" + "<b>Release Date:</b> " + movie.Data.release_date + "<br></br>" + "<b>Status:</b> " + movie.Data.status + "<br></br>" + "<b>Title:</b> " + movie.Data.title + "<br></br>" + "<b>Vote Average:</b> " + movie.Data.vote_average + "<br></br>" + "<b>Vote Count:</b> " + movie.Data.vote_average;
-            MailExtensions.MailSend(mailTo, mailCC, mailBCC, subject, body);
 
-            return new SuccessResult(Messages.MailSuccessful);
+                mailTo.Add(email);
+                string subject = "Movie Advice";
+                string body = "<b>Adult:</b> " + movie.Data.adult + "<br></br>" + "<b>Backdrop Path</b>: " + movie.Data.backdrop_path + "<br></br>" + "<b>Budget:</b> " + movie.Data.budget + "<br></br>" + "<b>Genres:</b> " + genresData + "<br></br>" + "<b>Id:</b> " + movie.Data.id + "<br></br>" + "<b>Imdb Id:</b> " + movie.Data.imdb_id + "<br></br>" + "<b>Original Language:</b> " + movie.Data.original_language + "<br></br>" + "<b>Original Title:</b> " + movie.Data.original_title + "<br></br>" + "<b>Overview:</b> " + movie.Data.overview + "<br></br>" + "<b>Popularity:</b> " + movie.Data.popularity + "<br></br>" + "<b>Production Companies:</b> " + productionCompaniesData + "<br></br>" + "<b>Production Countries:</b> " + productionCountriesData + "<br></br>" + "<b>Release Date:</b> " + movie.Data.release_date + "<br></br>" + "<b>Status:</b> " + movie.Data.status + "<br></br>" + "<b>Title:</b> " + movie.Data.title + "<br></br>" + "<b>Vote Average:</b> " + movie.Data.vote_average + "<br></br>" + "<b>Vote Count:</b> " + movie.Data.vote_average;
+                MailExtensions.MailSend(mailTo, mailCC, mailBCC, subject, body);
+
+                return new SuccessResult(Messages.MailSuccessful);
+            }
+            catch (Exception ex)
+            {
+
+                return new ErrorResult(ex.Message);
+            }
         }
         
         //id'si verilen filmi getirme
         public IDataResult<MovieApiResult> GetMovieFromApiById(int movieId)
         {
-            HttpWebRequest apiRequest = WebRequest.CreateHttp(string.Format("https://api.themoviedb.org/3/movie/{0}?api_key={1}", movieId, apiKey)) as HttpWebRequest;
-
-            string apiResponse = "";
-
-            using (HttpWebResponse response = apiRequest.GetResponse() as HttpWebResponse)
+            try
             {
-                StreamReader reader = new StreamReader(response.GetResponseStream());
-                apiResponse = reader.ReadToEnd();
+                HttpWebRequest apiRequest = WebRequest.CreateHttp(string.Format("https://api.themoviedb.org/3/movie/{0}?api_key={1}", movieId, apiKey)) as HttpWebRequest;
+
+                string apiResponse = "";
+
+                using (HttpWebResponse response = apiRequest.GetResponse() as HttpWebResponse)
+                {
+                    StreamReader reader = new StreamReader(response.GetResponseStream());
+                    apiResponse = reader.ReadToEnd();
+                }
+
+                MovieApiResult rootObject = JsonConvert.DeserializeObject<MovieApiResult>(apiResponse);
+
+                return new SuccessDataResult<MovieApiResult>(rootObject);
             }
+            catch (Exception ex)
+            {
 
-            MovieApiResult rootObject = JsonConvert.DeserializeObject<MovieApiResult>(apiResponse);
-
-            return new SuccessDataResult<MovieApiResult>(rootObject);
+                return new ErrorDataResult<MovieApiResult>(ex.Message);
+            }
         }
     }
 }

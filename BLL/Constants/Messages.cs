@@ -16,6 +16,8 @@ namespace BLL.Constants
         public static string Error = "Error occurred while processing";
         public static string MailSuccessful = "The mail was sent successfully";
         public static string MailError = "Error occurred while processing";
+        public static string EmailAlreadyExist = "Email Already Exist";
+        
 
     }
 }
