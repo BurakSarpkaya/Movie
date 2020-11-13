@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using BLL.Abstract;
+﻿using BLL.Abstract;
 using Entities.Dto;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Movie.Controllers
@@ -53,5 +48,6 @@ namespace Movie.Controllers
 
             return Ok(result.Data);
         }
+
     }
 }

@@ -10,7 +10,7 @@ namespace BLL.Abstract
     public interface IUserAppService
     {
         IResult Add(UserForRegisterDto user);
-
         Users GetByMail(string email);
+       IDataResult<List<UserDto>> GetList();
     }
 }

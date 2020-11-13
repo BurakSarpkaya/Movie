@@ -1,5 +1,6 @@
 ﻿using BLL.Abstract;
 using BLL.Constants;
+using Core.Aspect.Autofac.Performance;
 using Core.Extensions;
 using Core.Utility.Results;
 using Entities.Dto;
@@ -41,11 +42,12 @@ namespace BLL.Concrete
 
         }
 
-        //Kişisel hesaptaki film bilgilerini getirme
+        //Kişisel hesaptaki film bilgilerini getirme       
         public IDataResult<AccountMovie> GetMovieById(int movieId)
         {
             try
             {
+                
                 HttpWebRequest apiRequest = WebRequest.CreateHttp(string.Format("https://api.themoviedb.org/3/movie/{0}/account_states?api_key={1}&session_id={2}", movieId, apiKey, sessionId)) as HttpWebRequest;
 
                 string apiResponse = "";
@@ -75,7 +77,7 @@ namespace BLL.Concrete
             {
                 var tasks = new List<MovieResult>();
 
-                for (int i = 1; i < 5; i++)
+                for (int i = 1; i < 500; i++)
                 {
                     tasks.AddRange(GetPages(i));
                 }

@@ -30,5 +30,21 @@ namespace Core.DataAccess.EntityFramework
             }
 
         }
+
+        public IList<TEntity> GetList(Expression<Func<TEntity, bool>> filter = null)
+        {
+            using (var context = new TContext())
+            {
+                var entities = context.Set<TEntity>();
+                try
+                {
+                    return filter == null ? entities.ToList() : entities.Where(filter).ToList();
+                }
+                catch
+                {
+                    return entities.ToList();
+                }
+            }
+        }
     }
 }

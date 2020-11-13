@@ -9,5 +9,6 @@ namespace Core.DataAccess
     {
         T Add(T entity);
         T Get(Expression<Func<T, bool>> filter);
+        IList<T> GetList(Expression<Func<T, bool>> filter = null);
     }
 }

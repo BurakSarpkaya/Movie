@@ -2,6 +2,7 @@
 using Entities.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading;
 
 namespace Movie.Controllers
 {
@@ -39,10 +40,11 @@ namespace Movie.Controllers
             return BadRequest(result.Message);
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet("GetById")]
         public IActionResult GetMovieById(int movieId)
         {
+            
             var result = _movieAppService.GetMovieById(movieId);
             if (result.Success)
                 return Ok(result.Data);
